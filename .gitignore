@@ -1,0 +1,47 @@
+# Runtime logs and state
+*.log
+*.err.log
+*.out.log
+site.err.log
+site.out.log
+mediamtx.err.log
+mediamtx.out.log
+recording_state.json
+rkipc.generated.ini
+__pycache__/
+*.pyc
+
+# Camera recordings and media output
+recordings/
+*.mp4
+*.mkv
+*.mov
+*.avi
+
+# Large binaries and vendor payloads
+mediamtx.exe
+*.exe
+*.dll
+*.so
+*.a
+*.tar
+*.tar.gz
+*.tar.bz2
+*.zip
+*.7z
+*.rar
+*.img
+*.bin
+
+# Full Rockchip/Luckfox SDK directories are intentionally excluded
+media/
+project/
+sysdrv/
+tools/
+output/
+
+# Local editor and OS noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

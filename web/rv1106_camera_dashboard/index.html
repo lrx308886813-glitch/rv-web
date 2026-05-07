@@ -1,0 +1,1115 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RV1106 魔法监控台</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #101a44;
+      --panel: rgba(30, 47, 99, .88);
+      --panel-2: rgba(45, 67, 129, .92);
+      --surface: rgba(18, 32, 78, .84);
+      --line: rgba(167, 213, 255, .36);
+      --line-strong: rgba(255, 216, 112, .78);
+      --text: #fff9e8;
+      --muted: #b7d8ef;
+      --accent: #4bdd9a;
+      --accent-soft: rgba(75, 221, 154, .18);
+      --blue: #6ec6ff;
+      --violet: #a38aff;
+      --pink: #ff88c9;
+      --gold: #ffd86f;
+      --warn: #f3a83b;
+      --danger: #ff6464;
+      --shadow: 0 18px 50px rgba(5, 11, 39, .34);
+      font-family: "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(180deg, rgba(255, 216, 112, .16) 0 1px, transparent 1px 100%),
+        linear-gradient(90deg, rgba(110, 198, 255, .12) 0 1px, transparent 1px 100%),
+        linear-gradient(180deg, #243a82 0%, #132864 42%, #10173b 100%);
+      background-size: 42px 42px, 42px 42px, auto;
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    body::before {
+      background-image: url("data:image/svg+xml,%3Csvg width='1600' height='900' viewBox='0 0 1600 900' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 716c152-42 222-134 348-126 91 6 135 72 233 67 113-5 145-96 276-103 124-7 185 68 291 57 116-12 152-118 270-125 77-5 137 35 182 77v337H0Z' fill='%230c1740' fill-opacity='.44'/%3E%3Cpath d='M962 536h55v-88l27-35 27 35v88h54v-132l34-38 34 38v132h47v364H918V536h44Z' fill='%232f4f92' fill-opacity='.42'/%3E%3Cpath d='M0 778c222-47 366-50 558-19 202 32 373 38 546 0 193-43 332-38 496 8v133H0Z' fill='%2308112f' fill-opacity='.58'/%3E%3C/svg%3E");
+      background-size: cover;
+      background-position: center bottom;
+      opacity: .9;
+    }
+
+    body::after {
+      background:
+        linear-gradient(115deg, transparent 0 18%, rgba(255, 255, 255, .07) 18.3% 18.8%, transparent 19.1% 100%),
+        linear-gradient(245deg, transparent 0 34%, rgba(255, 216, 112, .07) 34.2% 34.6%, transparent 34.9% 100%);
+      mix-blend-mode: screen;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      height: 38px;
+      border: 1px solid rgba(255, 216, 112, .42);
+      border-radius: 8px;
+      color: var(--text);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, .12), transparent 55%),
+        linear-gradient(135deg, rgba(54, 86, 166, .95), rgba(30, 49, 113, .95));
+      cursor: pointer;
+      font-weight: 650;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18), 0 8px 18px rgba(6, 14, 43, .22);
+      transition: border-color .16s ease, background .16s ease, transform .16s ease, box-shadow .16s ease;
+    }
+
+    button:hover:not(:disabled) {
+      border-color: var(--gold);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .22), 0 10px 22px rgba(6, 14, 43, .3);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: .5;
+    }
+
+    button:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+
+    .primary {
+      border-color: rgba(124, 255, 187, .82);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, .16), transparent 50%),
+        linear-gradient(135deg, #2fc783, #178858);
+    }
+
+    .blue {
+      border-color: rgba(142, 216, 255, .78);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, .16), transparent 50%),
+        linear-gradient(135deg, #4aaeff, #315fbd);
+    }
+
+    .warn {
+      border-color: rgba(255, 224, 122, .82);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, .16), transparent 50%),
+        linear-gradient(135deg, #d4932e, #835314);
+    }
+
+    .danger {
+      border-color: rgba(255, 156, 156, .8);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, .14), transparent 50%),
+        linear-gradient(135deg, #e0526f, #8c2739);
+    }
+
+    input {
+      width: 100%;
+      height: 38px;
+      border: 1px solid rgba(167, 213, 255, .38);
+      border-radius: 8px;
+      outline: none;
+      color: var(--text);
+      background: rgba(7, 17, 47, .62);
+      padding: 0 10px;
+      box-shadow: inset 0 2px 8px rgba(0, 0, 0, .25);
+    }
+
+    input:focus {
+      border-color: var(--blue);
+    }
+
+    .layout {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 324px minmax(0, 1fr);
+      height: 100vh;
+    }
+
+    .sidebar {
+      min-height: 0;
+      border-right: 1px solid rgba(255, 216, 112, .34);
+      background:
+        linear-gradient(180deg, rgba(255, 216, 112, .13), transparent 220px),
+        linear-gradient(165deg, rgba(31, 58, 122, .94), rgba(16, 32, 82, .94));
+      overflow: auto;
+      box-shadow: 14px 0 34px rgba(3, 9, 30, .28);
+      backdrop-filter: blur(12px);
+    }
+
+    .brand {
+      position: relative;
+      padding: 24px 22px 22px;
+      border-bottom: 1px solid rgba(255, 216, 112, .3);
+      background:
+        linear-gradient(135deg, rgba(255, 136, 201, .18), transparent 58%),
+        linear-gradient(180deg, rgba(110, 198, 255, .18), transparent);
+      overflow: hidden;
+    }
+
+    .brand::after {
+      content: "";
+      position: absolute;
+      right: -54px;
+      top: 12px;
+      width: 128px;
+      height: 128px;
+      background-image: url("data:image/svg+xml,%3Csvg width='128' height='128' viewBox='0 0 128 128' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M64 6 76 42l38-9-26 29 30 24-39 2-15 36-15-36-39-2 30-24-26-29 38 9Z' fill='%23ffd86f' fill-opacity='.42'/%3E%3Cpath d='M64 27 71 51l25-5-17 19 20 15-26 2-9 24-9-24-26-2 20-15-17-19 25 5Z' fill='%23fff9e8' fill-opacity='.34'/%3E%3C/svg%3E");
+      background-size: contain;
+      opacity: .8;
+    }
+
+    .brand h1 {
+      position: relative;
+      margin: 0;
+      max-width: 258px;
+      font-size: 22px;
+      line-height: 1.18;
+      letter-spacing: 0;
+      text-shadow: 0 3px 12px rgba(6, 14, 43, .42);
+      z-index: 1;
+    }
+
+    .status-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 13px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 28px;
+      padding: 0 10px;
+      border: 1px solid rgba(255, 216, 112, .34);
+      border-radius: 999px;
+      color: #d8efff;
+      background: rgba(7, 17, 47, .48);
+      font-size: 12px;
+      white-space: nowrap;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1);
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--warn);
+      box-shadow: 0 0 10px currentColor;
+    }
+
+    .dot.ok { background: var(--accent); }
+    .dot.err { background: var(--danger); }
+
+    .controls {
+      padding: 20px 18px 28px;
+    }
+
+    .group {
+      position: relative;
+      margin-bottom: 18px;
+      border: 1px solid rgba(167, 213, 255, .22);
+      border-radius: 10px;
+      padding: 14px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, .08), transparent 48%),
+        rgba(8, 20, 58, .36);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08);
+    }
+
+    .group h2 {
+      margin: 0 0 12px;
+      color: #ffe6a0;
+      font-size: 12px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, .28);
+    }
+
+    label {
+      display: block;
+      margin: 0 0 7px;
+      color: #c7e7ff;
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .field {
+      margin-bottom: 12px;
+    }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .preset-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .preset-grid button {
+      height: 48px;
+      line-height: 1.2;
+    }
+
+    .preset-grid button span {
+      display: block;
+      margin-top: 4px;
+      color: #b9ddf4;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .segmented button.active {
+      border-color: rgba(255, 216, 112, .92);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, .2), transparent 48%),
+        linear-gradient(135deg, rgba(50, 205, 143, .95), rgba(43, 119, 190, .92));
+      color: #fffce8;
+    }
+
+    .preset-grid button.active {
+      border-color: rgba(255, 216, 112, .95);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, .22), transparent 48%),
+        linear-gradient(135deg, rgba(75, 221, 154, .96), rgba(163, 138, 255, .88));
+      color: #fffce8;
+    }
+
+    .stack {
+      display: grid;
+      gap: 9px;
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+    }
+
+    .path-box {
+      min-height: 54px;
+      border: 1px solid rgba(167, 213, 255, .28);
+      border-radius: 8px;
+      padding: 10px;
+      color: #e6f6ff;
+      background: rgba(7, 17, 47, .58);
+      font-size: 12px;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
+      box-shadow: inset 0 2px 10px rgba(0, 0, 0, .24);
+    }
+
+    .hint {
+      margin-top: 8px;
+      color: #a9d1ee;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .quality-status {
+      margin-top: 10px;
+      min-height: 34px;
+      border: 1px solid rgba(255, 216, 112, .26);
+      border-radius: 8px;
+      padding: 8px 10px;
+      color: #dff3ff;
+      background: rgba(7, 17, 47, .46);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .main {
+      display: grid;
+      grid-template-rows: 78px minmax(0, 1fr);
+      min-width: 0;
+      min-height: 0;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      border-bottom: 1px solid rgba(255, 216, 112, .26);
+      padding: 0 24px;
+      background:
+        linear-gradient(90deg, rgba(255, 216, 112, .14), transparent 44%),
+        rgba(10, 22, 62, .76);
+      backdrop-filter: blur(10px);
+    }
+
+    .title h1 {
+      margin: 0;
+      font-size: 23px;
+      letter-spacing: 0;
+      color: #fff7d0;
+      text-shadow: 0 3px 12px rgba(0, 0, 0, .28);
+    }
+
+    .title p {
+      margin: 7px 0 0;
+      color: #b9ddf4;
+      font-size: 13px;
+      overflow-wrap: anywhere;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .actions button {
+      width: 96px;
+    }
+
+    .content {
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) 250px;
+      gap: 18px;
+      min-height: 0;
+      padding: 20px 24px 22px;
+    }
+
+    .viewer {
+      position: relative;
+      min-height: 340px;
+      border: 2px solid rgba(255, 216, 112, .58);
+      border-radius: 12px;
+      background:
+        linear-gradient(180deg, rgba(110, 198, 255, .1), transparent 28%),
+        #050708;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .viewer::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border: 1px solid rgba(255, 255, 255, .12);
+      border-radius: 10px;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    iframe {
+      display: block;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 100%;
+      height: 100%;
+      transform: translate(-50%, -50%);
+      border: 0;
+      background: #050708;
+    }
+
+    .history-video {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: #050708;
+    }
+
+    .cover {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      text-align: center;
+      background:
+        linear-gradient(180deg, rgba(23, 39, 94, .76), rgba(5, 7, 8, .86));
+      pointer-events: none;
+    }
+
+    .cover.hidden { display: none; }
+
+    .cover strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 20px;
+      color: #fff3bc;
+    }
+
+    .cover span {
+      color: #b9ddf4;
+      font-size: 13px;
+    }
+
+    .history {
+      display: grid;
+      grid-template-columns: 380px minmax(0, 1fr);
+      gap: 14px;
+      min-height: 0;
+    }
+
+    .history-list,
+    .playback {
+      min-height: 0;
+      border: 1px solid rgba(255, 216, 112, .34);
+      border-radius: 12px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, .08), transparent 40%),
+        rgba(22, 41, 96, .76);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .history-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      min-height: 48px;
+      border-bottom: 1px solid rgba(255, 216, 112, .28);
+      padding: 0 12px;
+      background: rgba(8, 20, 58, .32);
+    }
+
+    .history-head h2 {
+      margin: 0;
+      font-size: 15px;
+      letter-spacing: 0;
+      color: #fff3bc;
+    }
+
+    .history-head button {
+      width: 76px;
+      height: 32px;
+      font-size: 13px;
+    }
+
+    .items {
+      height: calc(100% - 48px);
+      overflow: auto;
+      padding: 8px;
+    }
+
+    .record-item {
+      width: 100%;
+      height: auto;
+      min-height: 54px;
+      margin-bottom: 8px;
+      padding: 9px 10px;
+      text-align: left;
+      border-radius: 8px;
+      color: var(--text);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, .08), transparent 48%),
+        rgba(8, 20, 58, .58);
+    }
+
+    .record-item.active {
+      border-color: rgba(255, 216, 112, .92);
+      background:
+        linear-gradient(135deg, rgba(75, 221, 154, .22), rgba(110, 198, 255, .18));
+    }
+
+    .record-item b {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 13px;
+    }
+
+    .record-item span {
+      color: #b9ddf4;
+      font-size: 12px;
+    }
+
+    .empty {
+      display: grid;
+      place-items: center;
+      height: 100%;
+      color: #b9ddf4;
+      font-size: 13px;
+      text-align: center;
+      padding: 18px;
+    }
+
+    @media (max-width: 1100px) {
+      body { overflow: auto; }
+
+      .layout {
+        grid-template-columns: 1fr;
+        height: auto;
+        min-height: 100vh;
+      }
+
+      .sidebar {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .main {
+        grid-template-rows: auto auto;
+      }
+
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 18px;
+      }
+
+      .content {
+        grid-template-rows: 520px auto;
+        padding: 18px;
+      }
+
+      .history {
+        grid-template-columns: 1fr;
+        grid-template-rows: 240px 320px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .split,
+      .segmented,
+      .preset-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .actions {
+        width: 100%;
+      }
+
+      .actions button {
+        flex: 1;
+        width: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <h1>RV1106 魔法监控台</h1>
+        <div class="status-row">
+          <span class="pill"><span id="stateDot" class="dot"></span><span id="stateText">待机</span></span>
+          <span class="pill"><span id="recordDot" class="dot"></span><span id="recordState">未录制</span></span>
+          <span class="pill">RTSP 554</span>
+        </div>
+      </div>
+
+      <div class="controls">
+        <section class="group">
+          <h2>实况水晶</h2>
+          <div class="field">
+            <label>码流</label>
+            <div class="segmented">
+              <button id="mainBtn" class="active" type="button">主码流</button>
+              <button id="subBtn" type="button">子码流</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>播放协议</label>
+            <div class="segmented">
+              <button id="webrtcBtn" class="active" type="button">WebRTC</button>
+              <button id="hlsBtn" type="button">HLS</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="group">
+          <h2>画质调校</h2>
+          <div class="field">
+            <label>清晰度</label>
+            <div class="preset-grid">
+              <button class="quality-btn active" data-preset="ultra" type="button">超清<span>2304x1296</span></button>
+              <button class="quality-btn" data-preset="hd" type="button">高清<span>1920x1080</span></button>
+              <button class="quality-btn" data-preset="balanced" type="button">均衡<span>1280x720</span></button>
+              <button class="quality-btn" data-preset="smooth" type="button">流畅<span>704x576</span></button>
+            </div>
+          </div>
+          <div class="field">
+            <label>画幅比例</label>
+            <div class="preset-grid">
+              <button class="aspect-btn active" data-aspect="auto" type="button">自适应<span>跟随码流</span></button>
+              <button class="aspect-btn" data-aspect="wide" type="button">16:9<span>宽屏</span></button>
+              <button class="aspect-btn" data-aspect="standard" type="button">4:3<span>标准</span></button>
+              <button class="aspect-btn" data-aspect="fill" type="button">铺满<span>填充窗口</span></button>
+            </div>
+          </div>
+          <div id="qualityStatus" class="quality-status">当前：超清 · 2304x1296</div>
+        </section>
+
+        <section class="group">
+          <h2>影像卷轴</h2>
+          <div class="field">
+            <label for="recordDir">保存目录</label>
+            <input id="recordDir" autocomplete="off" spellcheck="false">
+            <div class="hint">可手动输入路径，也可以点“选择目录”打开系统目录选择器。</div>
+          </div>
+          <div class="split">
+            <button id="pickDirBtn" type="button">选择目录</button>
+            <button id="openDirBtn" type="button">打开目录</button>
+          </div>
+          <div class="split" style="margin-top: 9px;">
+            <button id="startRecordBtn" class="primary" type="button">开始录制</button>
+            <button id="stopRecordBtn" class="danger" type="button" disabled>停止录制</button>
+          </div>
+          <div id="recordPath" class="path-box" style="margin-top: 10px;">等待选择保存目录</div>
+        </section>
+
+        <section class="group">
+          <h2>信号源</h2>
+          <div class="path-box" id="sourceUrl">rtsp://192.168.31.18/live/0</div>
+        </section>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="title">
+          <h1 id="title">主码流</h1>
+          <p id="subtitle">WebRTC</p>
+        </div>
+        <div class="actions">
+          <button id="reloadBtn" class="blue" type="button">刷新</button>
+          <button id="stopLiveBtn" class="warn" type="button">停止</button>
+          <button id="fullscreenBtn" type="button">全屏</button>
+        </div>
+      </header>
+
+      <section class="content">
+        <div id="frameWrap" class="viewer">
+          <iframe id="streamFrame" title="RV1106 live stream" allow="autoplay; fullscreen; encrypted-media"></iframe>
+          <div id="cover" class="cover">
+            <div>
+              <strong>等待视频流</strong>
+              <span id="coverText">http://localhost:8889/main</span>
+            </div>
+          </div>
+        </div>
+
+        <section class="history">
+          <div class="history-list">
+            <div class="history-head">
+              <h2>历史回放</h2>
+              <button id="refreshHistoryBtn" type="button">刷新</button>
+            </div>
+            <div id="historyItems" class="items">
+              <div class="empty">暂无录像</div>
+            </div>
+          </div>
+
+          <div class="playback">
+            <video id="historyVideo" class="history-video" controls playsinline></video>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const DEVICE_IP = "192.168.31.18";
+
+    const state = {
+      stream: "main",
+      protocol: "webrtc",
+      quality: "ultra",
+      aspect: "auto",
+      loaded: false,
+      recording: false,
+      selectedRecording: "",
+      applyingQuality: false
+    };
+
+    const qualityPresets = {
+      ultra: { label: "超清", stream: "main", main: "2304x1296", sub: "704x576" },
+      hd: { label: "高清", stream: "main", main: "1920x1080", sub: "704x576" },
+      balanced: { label: "均衡", stream: "main", main: "1280x720", sub: "704x576" },
+      smooth: { label: "流畅", stream: "sub", main: "1280x720", sub: "704x576" }
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const els = {
+      stateDot: $("stateDot"),
+      stateText: $("stateText"),
+      recordDot: $("recordDot"),
+      recordState: $("recordState"),
+      recordDir: $("recordDir"),
+      recordPath: $("recordPath"),
+      sourceUrl: $("sourceUrl"),
+      title: $("title"),
+      subtitle: $("subtitle"),
+      cover: $("cover"),
+      coverText: $("coverText"),
+      frame: $("streamFrame"),
+      frameWrap: $("frameWrap"),
+      mainBtn: $("mainBtn"),
+      subBtn: $("subBtn"),
+      webrtcBtn: $("webrtcBtn"),
+      hlsBtn: $("hlsBtn"),
+      qualityStatus: $("qualityStatus"),
+      qualityBtns: Array.from(document.querySelectorAll(".quality-btn")),
+      aspectBtns: Array.from(document.querySelectorAll(".aspect-btn")),
+      startRecordBtn: $("startRecordBtn"),
+      stopRecordBtn: $("stopRecordBtn"),
+      historyItems: $("historyItems"),
+      historyVideo: $("historyVideo")
+    };
+
+    function gatewayHost() {
+      return location.hostname || "localhost";
+    }
+
+    function streamName(stream = state.stream) {
+      return stream === "main" ? "主码流" : "子码流";
+    }
+
+    function sourceUrl(stream = state.stream) {
+      return `rtsp://${DEVICE_IP}/live/${stream === "main" ? "0" : "1"}`;
+    }
+
+    function liveUrl() {
+      const path = state.stream;
+      const port = state.protocol === "webrtc" ? "8889" : "8888";
+      return `http://${gatewayHost()}:${port}/${path}?controls=true&muted=true&autoplay=true&playsInline=true`;
+    }
+
+    async function api(path, options = {}) {
+      const res = await fetch(path, {
+        headers: { "Content-Type": "application/json" },
+        ...options
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+      return data;
+    }
+
+    function setLiveStatus(type, text) {
+      els.stateDot.className = `dot ${type || ""}`.trim();
+      els.stateText.textContent = text;
+    }
+
+    function setRecordStatus(active, text) {
+      els.recordDot.className = `dot ${active ? "ok" : ""}`.trim();
+      els.recordState.textContent = text;
+      els.startRecordBtn.disabled = active;
+      els.stopRecordBtn.disabled = !active;
+    }
+
+    function syncLive() {
+      const url = liveUrl();
+      els.sourceUrl.textContent = sourceUrl();
+      els.title.textContent = streamName();
+      els.subtitle.textContent = `${state.protocol.toUpperCase()} · ${url}`;
+      els.coverText.textContent = url;
+      els.mainBtn.classList.toggle("active", state.stream === "main");
+      els.subBtn.classList.toggle("active", state.stream === "sub");
+      els.webrtcBtn.classList.toggle("active", state.protocol === "webrtc");
+      els.hlsBtn.classList.toggle("active", state.protocol === "hls");
+      syncQualityControls();
+      applyAspect();
+    }
+
+    function currentPreset() {
+      return qualityPresets[state.quality] || qualityPresets.ultra;
+    }
+
+    function syncQualityControls(message = "") {
+      const preset = currentPreset();
+      const size = state.stream === "main" ? preset.main : preset.sub;
+      els.qualityBtns.forEach((button) => {
+        button.classList.toggle("active", button.dataset.preset === state.quality);
+        button.disabled = state.applyingQuality || state.recording;
+      });
+      els.aspectBtns.forEach((button) => {
+        button.classList.toggle("active", button.dataset.aspect === state.aspect);
+      });
+      els.qualityStatus.textContent = message || `当前：${preset.label} · ${streamName(state.stream)} · ${size}`;
+    }
+
+    function aspectRatio() {
+      if (state.aspect === "wide") return 16 / 9;
+      if (state.aspect === "standard") return 4 / 3;
+      if (state.aspect === "fill") return 0;
+      const size = state.stream === "main" ? currentPreset().main : currentPreset().sub;
+      const [width, height] = size.split("x").map((value) => Number.parseInt(value, 10));
+      return width && height ? width / height : 16 / 9;
+    }
+
+    function applyAspect() {
+      if (!els.frameWrap || !els.frame) return;
+      const ratio = aspectRatio();
+      if (!ratio) {
+        els.frame.style.width = "100%";
+        els.frame.style.height = "100%";
+        return;
+      }
+      const wrapWidth = els.frameWrap.clientWidth || 1;
+      const wrapHeight = els.frameWrap.clientHeight || 1;
+      if (wrapWidth / wrapHeight > ratio) {
+        els.frame.style.width = `${Math.round(wrapHeight * ratio)}px`;
+        els.frame.style.height = "100%";
+      } else {
+        els.frame.style.width = "100%";
+        els.frame.style.height = `${Math.round(wrapWidth / ratio)}px`;
+      }
+    }
+
+    async function loadVideoSettings() {
+      try {
+        const settings = await api("/api/video-settings");
+        if (settings.preset && qualityPresets[settings.preset]) {
+          state.quality = settings.preset;
+        }
+        syncQualityControls();
+      } catch (error) {
+        syncQualityControls(`画质状态读取失败：${error.message}`);
+      }
+    }
+
+    async function applyQualityPreset(presetName) {
+      if (!qualityPresets[presetName] || state.applyingQuality) return;
+      if (state.recording) {
+        syncQualityControls("录制中不能切换画质，先停止录制");
+        return;
+      }
+
+      state.applyingQuality = true;
+      syncQualityControls(`正在应用 ${qualityPresets[presetName].label}，视频会短暂重连...`);
+      let message = "";
+      try {
+        const result = await api("/api/video-preset", {
+          method: "POST",
+          body: JSON.stringify({ preset: presetName })
+        });
+        state.quality = result.preset || presetName;
+        state.stream = result.stream || qualityPresets[presetName].stream;
+        syncLive();
+        loadHistory();
+        window.setTimeout(play, 2600);
+      } catch (error) {
+        message = `画质切换失败：${error.message}`;
+      } finally {
+        state.applyingQuality = false;
+        syncQualityControls(message);
+      }
+    }
+
+    function play() {
+      syncLive();
+      els.frame.src = liveUrl();
+      state.loaded = true;
+      setLiveStatus("", "连接中");
+      applyAspect();
+    }
+
+    function stopLive() {
+      els.frame.removeAttribute("src");
+      els.cover.classList.remove("hidden");
+      state.loaded = false;
+      setLiveStatus("", "待机");
+    }
+
+    function selectStream(stream) {
+      state.stream = stream;
+      syncLive();
+      loadHistory();
+      if (state.loaded) play();
+    }
+
+    function selectProtocol(protocol) {
+      state.protocol = protocol;
+      syncLive();
+      if (state.loaded) play();
+    }
+
+    function formatDuration(seconds) {
+      const total = Math.max(0, Math.round(seconds));
+      const m = Math.floor(total / 60);
+      const s = total % 60;
+      return `${m}分${String(s).padStart(2, "0")}秒`;
+    }
+
+    function formatTime(value) {
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return value;
+      return date.toLocaleString();
+    }
+
+    async function loadStatus() {
+      try {
+        const status = await api("/api/status");
+        els.recordDir.value = status.recordDir || "";
+        state.recording = Boolean(status.recording);
+        if (status.recording) {
+          setRecordStatus(true, `录制中 · ${streamName(status.recordStream || state.stream)}`);
+          els.recordPath.textContent = status.recordDir || "";
+        } else {
+          setRecordStatus(false, "未录制");
+          els.recordPath.textContent = status.recordDir || "等待选择保存目录";
+        }
+        syncQualityControls();
+      } catch (error) {
+        setRecordStatus(false, "服务异常");
+        els.recordPath.textContent = error.message;
+        syncQualityControls();
+      }
+    }
+
+    async function pickDirectory() {
+      els.recordPath.textContent = "等待系统目录选择器...";
+      const result = await api("/api/pick-directory", { method: "POST", body: "{}" });
+      if (result.path) {
+        els.recordDir.value = result.path;
+        els.recordPath.textContent = result.path;
+      } else {
+        els.recordPath.textContent = els.recordDir.value || "未选择目录";
+      }
+    }
+
+    async function openDirectory() {
+      const dir = els.recordDir.value.trim();
+      if (!dir) {
+        els.recordPath.textContent = "先选择或输入保存目录";
+        return;
+      }
+      await api("/api/open-directory", {
+        method: "POST",
+        body: JSON.stringify({ dir })
+      });
+    }
+
+    async function startRecording() {
+      const dir = els.recordDir.value.trim();
+      if (!dir) {
+        els.recordPath.textContent = "先选择或输入保存目录";
+        return;
+      }
+      els.recordPath.textContent = "正在启动录制...";
+      const result = await api("/api/recording/start", {
+        method: "POST",
+        body: JSON.stringify({ dir, stream: state.stream })
+      });
+      setRecordStatus(true, `录制中 · ${streamName(result.stream)}`);
+      els.recordPath.textContent = result.recordPath || dir;
+      state.recording = true;
+      syncQualityControls();
+      window.setTimeout(loadHistory, 1200);
+    }
+
+    async function stopRecording() {
+      els.recordPath.textContent = "正在停止录制...";
+      const result = await api("/api/recording/stop", { method: "POST", body: "{}" });
+      setRecordStatus(false, "未录制");
+      els.recordPath.textContent = result.recordDir || els.recordDir.value || "等待选择保存目录";
+      state.recording = false;
+      syncQualityControls();
+      window.setTimeout(loadHistory, 1800);
+    }
+
+    async function loadHistory() {
+      els.historyItems.innerHTML = '<div class="empty">正在读取录像...</div>';
+      try {
+        const result = await api(`/api/recordings?path=${encodeURIComponent(state.stream)}`);
+        const items = result.items || [];
+        if (!items.length) {
+          els.historyItems.innerHTML = '<div class="empty">暂无录像<br>停止录制后刷新列表</div>';
+          return;
+        }
+
+        els.historyItems.innerHTML = "";
+        items.slice().reverse().forEach((item) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "record-item";
+          button.innerHTML = `<b>${formatTime(item.start)}</b><span>${streamName(state.stream)} · ${formatDuration(item.duration)}</span>`;
+          button.addEventListener("click", () => {
+            state.selectedRecording = item.playUrl;
+            document.querySelectorAll(".record-item").forEach((el) => el.classList.remove("active"));
+            button.classList.add("active");
+            els.historyVideo.src = item.playUrl;
+            els.historyVideo.play().catch(() => {});
+          });
+          els.historyItems.appendChild(button);
+        });
+      } catch (error) {
+        els.historyItems.innerHTML = `<div class="empty">${error.message}</div>`;
+      }
+    }
+
+    els.frame.addEventListener("load", () => {
+      if (!state.loaded) return;
+      els.cover.classList.add("hidden");
+      setLiveStatus("ok", "播放中");
+      applyAspect();
+    });
+
+    $("reloadBtn").addEventListener("click", play);
+    $("stopLiveBtn").addEventListener("click", stopLive);
+    $("fullscreenBtn").addEventListener("click", () => {
+      if (els.frameWrap.requestFullscreen) els.frameWrap.requestFullscreen();
+    });
+    $("pickDirBtn").addEventListener("click", () => pickDirectory().catch((error) => {
+      els.recordPath.textContent = error.message;
+    }));
+    $("openDirBtn").addEventListener("click", () => openDirectory().catch((error) => {
+      els.recordPath.textContent = error.message;
+    }));
+    $("startRecordBtn").addEventListener("click", () => startRecording().catch((error) => {
+      setRecordStatus(false, "启动失败");
+      els.recordPath.textContent = error.message;
+    }));
+    $("stopRecordBtn").addEventListener("click", () => stopRecording().catch((error) => {
+      els.recordPath.textContent = error.message;
+    }));
+    $("refreshHistoryBtn").addEventListener("click", loadHistory);
+    els.mainBtn.addEventListener("click", () => selectStream("main"));
+    els.subBtn.addEventListener("click", () => selectStream("sub"));
+    els.webrtcBtn.addEventListener("click", () => selectProtocol("webrtc"));
+    els.hlsBtn.addEventListener("click", () => selectProtocol("hls"));
+    els.qualityBtns.forEach((button) => {
+      button.addEventListener("click", () => applyQualityPreset(button.dataset.preset));
+    });
+    els.aspectBtns.forEach((button) => {
+      button.addEventListener("click", () => {
+        state.aspect = button.dataset.aspect || "auto";
+        syncQualityControls();
+        applyAspect();
+      });
+    });
+
+    syncLive();
+    loadStatus();
+    loadVideoSettings();
+    loadHistory();
+    window.addEventListener("resize", applyAspect);
+    window.addEventListener("load", () => window.setTimeout(play, 300));
+  </script>
+</body>
+</html>
