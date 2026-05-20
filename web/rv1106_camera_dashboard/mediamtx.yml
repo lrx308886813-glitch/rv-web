@@ -9,7 +9,7 @@ webrtcAddress: :8889
 paths:
   main:
     source: rtsp://192.168.31.18/live/0
-    rtspTransport: tcp
+    rtspTransport: udp
     sourceOnDemand: yes
     record: no
     recordPath: 'E:/code/rvtest/web/rv1106_camera_dashboard/recordings/%path/%Y-%m-%d_%H-%M-%S-%f'
@@ -20,7 +20,7 @@ paths:
 
   sub:
     source: rtsp://192.168.31.18/live/1
-    rtspTransport: tcp
+    rtspTransport: udp
     sourceOnDemand: yes
     record: no
     recordPath: 'E:/code/rvtest/web/rv1106_camera_dashboard/recordings/%path/%Y-%m-%d_%H-%M-%S-%f'

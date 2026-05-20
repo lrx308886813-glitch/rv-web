@@ -211,7 +211,7 @@ def _write_mediamtx_config(active_stream="", record_dir=None):
         lines.extend([
             f"  {name}:",
             f"    source: {source}",
-            "    rtspTransport: tcp",
+            "    rtspTransport: udp",
             "    sourceOnDemand: yes",
             f"    record: {record}",
             f"    recordPath: {_yaml_quote(record_path)}",
